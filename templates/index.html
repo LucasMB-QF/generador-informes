@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generador de Informes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        form { max-width: 500px; margin: 0 auto; }
+        input[type="file"] { margin-bottom: 20px; }
+        button { padding: 10px 15px; background: #0066cc; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Generar Informe desde Excel y Word</h1>
+    <form action="/procesar" method="post" enctype="multipart/form-data">
+        <label>Archivo Excel (.xlsx/.xlsm):</label><br>
+        <input type="file" name="archivo_excel" accept=".xlsx,.xlsm" required><br><br>
+        <label>Archivo Word (.docx):</label><br>
+        <input type="file" name="archivo_word" accept=".docx" required><br><br>
+        <button type="submit">Generar Informe</button>
+    </form>
+</body>
+</html>
