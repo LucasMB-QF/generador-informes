@@ -87,46 +87,39 @@ def reemplazar_campos(texto, wb):
 # --- Reemplazo en párrafos (versión robusta) ---
 
 def reemplazar_en_parrafo(parrafo: Paragraph, wb):
-    # Verificar si el párrafo contiene campos a reemplazar
+    # Unir todo el texto del párrafo
     texto_total = "".join(run.text for run in parrafo.runs)
     if not campo_regex.search(texto_total):
         return
     
-    # Dividir el texto en líneas para detectar títulos
-    lineas = texto_total.split('\n')
+    # Realizar reemplazos
+    texto_reemplazado = reemplazar_campos(texto_total, wb)
     
-    # Procesar cada línea por separado manteniendo formatos
-    nuevo_texto = []
-    for i, linea in enumerate(lineas):
-        linea_reemplazada = reemplazar_campos(linea, wb)
-        
-        # Determinar si es título (primera línea o comienza con número)
-        es_titulo = (i == 0) or linea.strip().startswith(('1.', '2.', '3.', '4.', '•', '-', '■'))
-        
-        if es_titulo:
-            # Mantener negrita para títulos
-            nuevo_texto.append(f"**{linea_reemplazada}**")
-        else:
-            # Texto normal sin negrita
-            nuevo_texto.append(linea_reemplazada)
+    # Identificar si es un párrafo especial (contiene "1. Resultados Generales")
+    es_resultados_generales = "1. Resultados Generales" in texto_total
     
-    # Unir las líneas procesadas
-    texto_final = '\n'.join(nuevo_texto)
-    
-    # Limpiar todas las runs existentes
+    # Limpiar todas las runs
     for run in parrafo.runs:
         run.text = ""
     
-    # Agregar el nuevo texto con formatos
+    # Agregar el texto reemplazado
     if parrafo.runs:
-        parrafo.runs[0].text = texto_final
+        parrafo.runs[0].text = texto_reemplazado
         
-        # Aplicar negrita solo a las partes entre **
-        for run in parrafo.runs:
-            if '**' in run.text:
-                partes = run.text.split('**')
-                run.text = partes[1] if len(partes) > 1 else partes[0]
-                run.bold = len(partes) > 1
+        # Aplicar formato especial para "Resultados Generales"
+        if es_resultados_generales:
+            # Dividir en título y contenido
+            partes = texto_reemplazado.split('\n', 1)
+            if len(partes) == 2:
+                parrafo.runs[0].text = partes[0] + '\n'
+                parrafo.runs[0].bold = True  # Título en negrita
+                
+                # Agregar segunda run para el contenido (sin negrita)
+                if len(parrafo.runs) < 2:
+                    parrafo.add_run(partes[1])
+                else:
+                    parrafo.runs[1].text = partes[1]
+                parrafo.runs[1].bold = False
 
 # --- Procesamiento de documento Word ---
 
