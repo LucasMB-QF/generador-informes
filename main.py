@@ -87,9 +87,40 @@ def reemplazar_campos(texto, wb):
 # --- Reemplazo en párrafos (versión robusta) ---
 
 def reemplazar_en_parrafo(parrafo: Paragraph, wb):
-    for run in parrafo.runs:
-        if campo_regex.search(run.text):
-            run.text = reemplazar_campos(run.text, wb)
+    # Verificar si hay campos a reemplazar
+    texto_total = "".join(run.text for run in parrafo.runs)
+    if not campo_regex.search(texto_total):
+        return
+    
+    # Obtener texto reemplazado
+    texto_reemplazado = reemplazar_campos(texto_total, wb)
+    
+    # Conservar estilo de la primera run (excepto negrita)
+    if parrafo.runs:
+        primera_run = parrafo.runs[0]
+        estilo_original = {
+            'italic': primera_run.italic,
+            'underline': primera_run.underline,
+            'font': primera_run.font.name,
+            'size': primera_run.font.size,
+            'color': primera_run.font.color.rgb if primera_run.font.color else None
+        }
+        
+        # Limpiar todas las runs
+        for run in parrafo.runs:
+            run.text = ""
+        
+        # Restaurar texto y formato
+        primera_run.text = texto_reemplazado
+        primera_run.bold = False  # Esto corrige específicamente el problema del negrita
+        primera_run.italic = estilo_original['italic']
+        primera_run.underline = estilo_original['underline']
+        if estilo_original['font']:
+            primera_run.font.name = estilo_original['font']
+        if estilo_original['size']:
+            primera_run.font.size = estilo_original['size']
+        if estilo_original['color']:
+            primera_run.font.color.rgb = estilo_original['color']
 
 # --- Procesamiento de documento Word ---
 
