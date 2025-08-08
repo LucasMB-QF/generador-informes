@@ -87,14 +87,40 @@ def reemplazar_campos(texto, wb):
 # --- Reemplazo en párrafos (versión robusta) ---
 
 def reemplazar_en_parrafo(parrafo: Paragraph, wb):
+    # Verificar si hay campos a reemplazar en el párrafo
     texto_total = "".join(run.text for run in parrafo.runs)
     if not campo_regex.search(texto_total):
         return
+    
+    # Obtener el texto reemplazado
     texto_reemplazado = reemplazar_campos(texto_total, wb)
+    
+    # Conservar el formato del primer carácter del párrafo
     if parrafo.runs:
-        parrafo.runs[0].text = texto_reemplazado
-        for i in range(1, len(parrafo.runs)):
-            parrafo.runs[i].text = ""
+        primer_run = parrafo.runs[0]
+        estilo_original = {
+            'bold': primer_run.bold,
+            'italic': primer_run.italic,
+            'underline': primer_run.underline,
+            'font': primer_run.font.name,
+            'size': primer_run.font.size
+        }
+        
+        # Limpiar todas las runs excepto la primera
+        for run in parrafo.runs[1:]:
+            run.text = ""
+        
+        # Asignar el texto reemplazado a la primera run
+        primer_run.text = texto_reemplazado
+        
+        # Restaurar el formato original
+        primer_run.bold = estilo_original['bold']
+        primer_run.italic = estilo_original['italic']
+        primer_run.underline = estilo_original['underline']
+        if estilo_original['font']:
+            primer_run.font.name = estilo_original['font']
+        if estilo_original['size']:
+            primer_run.font.size = estilo_original['size']
 
 # --- Procesamiento de documento Word ---
 
