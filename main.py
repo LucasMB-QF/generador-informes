@@ -39,8 +39,9 @@ campo_regex = re.compile(r"\{\{\s*([^\{\}]+?)\s*\}\}")
 # --- Formateo de valores ---
 
 def formatear_valor(valor):
-    if isinstance(valor, float):
-        return f"{valor:.1f}"
+    if isinstance(valor, (float, int)):
+        # Formatea con 1 decimal y reemplaza punto por coma
+        return f"{valor:.1f}".replace(".", ",")
     return str(valor) if valor is not None else ""
 
 # --- Lectura desde Excel ---
