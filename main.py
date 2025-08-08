@@ -169,7 +169,7 @@ async def procesar(
                 logger.info("Procesamiento completado correctamente")
 
                 nombre_base = archivo_word.filename.rsplit(".", 1)[0]
-                nombre_generado = f"{nombre_base} (generado).docx"
+                nombre_generado = f"{nombre_base}.docx"
                 nombre_generado_seguro = quote(nombre_generado)
 
                 return Response(
