@@ -95,15 +95,21 @@ def reemplazar_en_parrafo(parrafo: Paragraph, wb):
     # Obtener texto reemplazado
     texto_reemplazado = reemplazar_campos(texto_total, wb)
     
-    # Conservar estilo de la primera run (excepto negrita)
+    # Determinar si debemos mantener el negrita (para títulos específicos)
+    mantener_negrita = any(
+        texto_reemplazado.startswith(titulo) 
+        for titulo in ["Comentarios:", "1. Resultados Generales"]
+    )
+    
+    # Conservar estilo de la primera run
     if parrafo.runs:
         primera_run = parrafo.runs[0]
         estilo_original = {
+            'bold': primera_run.bold if mantener_negrita else False,
             'italic': primera_run.italic,
             'underline': primera_run.underline,
             'font': primera_run.font.name,
-            'size': primera_run.font.size,
-            'color': primera_run.font.color.rgb if primera_run.font.color else None
+            'size': primera_run.font.size
         }
         
         # Limpiar todas las runs
@@ -112,15 +118,13 @@ def reemplazar_en_parrafo(parrafo: Paragraph, wb):
         
         # Restaurar texto y formato
         primera_run.text = texto_reemplazado
-        primera_run.bold = False  # Esto corrige específicamente el problema del negrita
+        primera_run.bold = estilo_original['bold']
         primera_run.italic = estilo_original['italic']
         primera_run.underline = estilo_original['underline']
         if estilo_original['font']:
             primera_run.font.name = estilo_original['font']
         if estilo_original['size']:
             primera_run.font.size = estilo_original['size']
-        if estilo_original['color']:
-            primera_run.font.color.rgb = estilo_original['color']
 
 # --- Procesamiento de documento Word ---
 
